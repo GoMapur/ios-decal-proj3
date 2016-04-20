@@ -9,5 +9,8 @@
 import UIKit
 
 class PhotosCollectionViewCell: UICollectionViewCell {
-    
+    @IBOutlet weak var displayImage: UIImageView!
+    var url: String?
+    var photo: Photo?
 }
+

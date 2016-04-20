@@ -2,93 +2,65 @@
 //  PhotosCollectionViewController.swift
 //  Photos
 //
-//  Created by Mingjian Lu on 4/12/16.
-//  Copyright © 2016 iOS DeCal. All rights reserved.
+//  Created by Gene Yoo on 11/3/15.
+//  Copyright © 2015 iOS DeCal. All rights reserved.
 //
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
-
 class PhotosCollectionViewController: UICollectionViewController {
-
+    var photos: [Photo]! = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Register cell classes
-        self.collectionView!.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
-        // Do any additional setup after loading the view.
+        
+        let api = InstagramAPI()
+        api.loadPhotos(didLoadPhotos)
+        // FILL ME IN
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+    
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-    // MARK: UICollectionViewDataSource
-
-    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
-
-
+     * IMPLEMENT ANY COLLECTION VIEW DELEGATE METHODS YOU FIND NECESSARY
+     * Examples include cellForItemAtIndexPath, numberOfSections, etc.
+     */
+    
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
-        return 0
+        return photos.count
     }
-
+    
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath)
-    
-        // Configure the cell
-    
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotosCollectionCell", forIndexPath: indexPath) as! PhotosCollectionViewCell
+        let photo = photos[indexPath.row] as Photo
+        loadImageForCell(photo, imageView: cell.displayImage)
+        cell.url = photo.url
+        cell.photo = photo
         return cell
     }
-
-    // MARK: UICollectionViewDelegate
-
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(collectionView: UICollectionView, shouldHighlightItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(collectionView: UICollectionView, shouldSelectItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(collectionView: UICollectionView, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return false
-    }
-
-    override func collectionView(collectionView: UICollectionView, canPerformAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) -> Bool {
-        return false
-    }
-
-    override func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) {
     
+    override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        performSegueWithIdentifier("CollectionToDetail", sender: photos[indexPath.item])
     }
-    */
-
+    
+    /* Creates a session from a photo's url to download data to instantiate a UIImage.
+     It then sets this as the imageView's image. */
+    func loadImageForCell(photo: Photo, imageView: UIImageView) {
+        let url = NSURL(string:photo.url)
+        let data = NSData(contentsOfURL: url!)
+        imageView.image = UIImage(data: data!)
+    }
+    
+    /* Completion handler for API call. DO NOT CHANGE */
+    func didLoadPhotos(photos: [Photo]) {
+        self.photos = photos
+        self.collectionView!.reloadData()
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if let viewController2 = segue.destinationViewController as? PhotoDetailViewController {
+            if let senderPhoto = sender as? Photo {
+                viewController2.photo = senderPhoto
+            }
+        }
+    }
 }
+
